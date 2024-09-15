@@ -2,18 +2,29 @@ document.addEventListener('DOMContentLoaded', function() {
     const body = document.body;
     const head = document.head;
 
-    // Create and add Boxicons CSS
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://unpkg.com/boxicons/css/boxicons.min.css';
-    head.appendChild(link);
+    // Function to add a stylesheet
+    function addStylesheet(href) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href;
+        head.appendChild(link);
+    }
 
-    // Create and add styles
-    const style = document.createElement('style');
-    style.textContent = `
+    // Function to add a style block
+    function addStyle(content) {
+        const style = document.createElement('style');
+        style.textContent = content;
+        body.appendChild(style);
+    }
+
+    // Add Boxicons CSS
+    addStylesheet('https://unpkg.com/boxicons/css/boxicons.min.css');
+
+    // Add custom styles
+    addStyle(`
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f0f0; /* Main color - gray */
+            background-color: #f0f0f0;
             color: #333;
             margin: 0;
             padding: 0;
@@ -28,13 +39,22 @@ document.addEventListener('DOMContentLoaded', function() {
             border-radius: 15px;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
             text-align: center;
-            transform: translateY(-50px);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             opacity: 0;
-            animation: slideIn 1s forwards;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .container.show {
+            opacity: 1;
+            visibility: visible;
         }
 
         h1 {
-            color: #00bfff; /* Highlight color - sky blue */
+            color: #00bfff;
             font-size: 28px;
             margin-bottom: 20px;
             animation: fadeIn 1s ease-out;
@@ -47,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         button {
-            background-color: #00bfff; /* Highlight color - sky blue */
+            background-color: #00bfff;
             color: white;
             border: none;
             padding: 15px 25px;
@@ -95,23 +115,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .floating-button {
@@ -131,67 +136,152 @@ document.addEventListener('DOMContentLoaded', function() {
             align-items: center;
             justify-content: center;
             transition: background-color 0.3s, transform 0.2s;
+            z-index: 1000;
         }
 
-        .floating-button:hover {
-            background-color: #009fdc;
-            transform: scale(1.1);
+        .floating-button.close {
+            background-color: #ff4d4d;
         }
-    `;
-    body.appendChild(style);
+
+        .floating-button.close:hover {
+            background-color: #e60000;
+        }
+
+        .confirm-dialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .confirm-dialog.show {
+            display: block;
+        }
+
+        .confirm-dialog p {
+            margin-bottom: 20px;
+        }
+
+        .confirm-dialog button {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .confirm-dialog button:hover {
+            background-color: #e60000;
+        }
+    `);
 
     // Create and add floating button
-    const button = document.createElement('button');
-    button.className = 'floating-button';
-    button.innerHTML = '<i class="bx bx-trash"></i>'; // Boxicons trash icon
-    body.appendChild(button);
+    function createFloatingButton() {
+        const button = document.createElement('button');
+        button.className = 'floating-button';
+        button.innerHTML = '<i class="bx bx-menu"></i>'; // Boxicons menu icon initially
+        body.appendChild(button);
+        return button;
+    }
 
     // Create and add container
-    const container = document.createElement('div');
-    container.className = 'container fade-in hidden';
-    container.innerHTML = `
-        <h1>Manage IndexedDB</h1>
-        <p>Click the button below to delete the database</p>
-        <button id="deleteButton">Delete Database</button>
-        <div id="confirmBox" class="hidden">
-            <p>Please enter the verification code: <strong id="securityCode"></strong></p>
-            <input type="text" id="confirmationCode" placeholder="Enter verification code">
-            <button id="confirmDelete">Confirm Delete</button>
-        </div>
-        <p id="message"></p>
-    `;
-    body.appendChild(container);
+    function createContainer() {
+        const container = document.createElement('div');
+        container.className = 'container fade-in';
+        container.innerHTML = `
+            <h1>Manage IndexedDB</h1>
+            <p>Click the button below to delete the database</p>
+            <button id="deleteButton">Delete Database</button>
+            <div id="confirmBox" class="hidden">
+                <p>Please enter the verification code: <strong id="securityCode"></strong></p>
+                <input type="text" id="confirmationCode" placeholder="Enter verification code">
+                <button id="confirmDelete">Confirm Delete</button>
+            </div>
+            <p id="message"></p>
+        `;
+        body.appendChild(container);
+        return container;
+    }
 
-    // Show/hide container
-    button.addEventListener('click', function() {
-        const container = document.querySelector('.container');
-        container.classList.toggle('hidden');
-    });
+    // Create and add confirmation dialog
+    function createConfirmDialog() {
+        const dialog = document.createElement('div');
+        dialog.className = 'confirm-dialog';
+        dialog.innerHTML = `
+            <p>Are you sure you want to delete the database?</p>
+            <button id="confirmDeleteDatabase">Yes, delete</button>
+            <button id="cancelDeleteDatabase">Cancel</button>
+        `;
+        body.appendChild(dialog);
+        return dialog;
+    }
+
+    const button = createFloatingButton();
+    const container = createContainer();
+    const confirmDialog = createConfirmDialog();
 
     let randomCode = '';
+    let isContainerVisible = false;
 
     // Generate random 9-digit verification code
     function generateRandomCode() {
-        randomCode = Math.floor(100000000 + Math.random() * 900000000).toString(); // Generate 9 digits
+        randomCode = Math.floor(100000000 + Math.random() * 900000000).toString();
         document.getElementById('securityCode').textContent = randomCode;
     }
 
-    // Automatically generate verification code on page load
-    generateRandomCode();
+    // Function to hide the container
+    function hideContainer() {
+        container.classList.remove('show');
+        isContainerVisible = false;
+        button.classList.remove('close');
+        button.innerHTML = '<i class="bx bx-menu"></i>'; // Boxicons menu icon
+    }
 
-    // Show confirmation box
+    // Show/hide container
+    button.addEventListener('click', function() {
+        if (isContainerVisible) {
+            hideContainer();
+        } else {
+            container.classList.add('show');
+            isContainerVisible = true;
+            button.classList.add('close');
+            button.innerHTML = '<i class="bx bx-x"></i>'; // Boxicons close icon
+        }
+    });
+
+    // Show confirmation dialog
     document.getElementById('deleteButton').addEventListener('click', function() {
-        document.getElementById('confirmBox').classList.remove('hidden');
-        document.getElementById('message').textContent = '';
+        confirmDialog.classList.add('show');
     });
 
     // Confirm delete button click
+    document.getElementById('confirmDeleteDatabase').addEventListener('click', function() {
+        document.getElementById('confirmBox').classList.remove('hidden');
+        document.getElementById('message').textContent = '';
+        confirmDialog.classList.remove('show');
+    });
+
+    // Cancel delete button click
+    document.getElementById('cancelDeleteDatabase').addEventListener('click', function() {
+        confirmDialog.classList.remove('show');
+    });
+
     document.getElementById('confirmDelete').addEventListener('click', function() {
         const confirmationCode = document.getElementById('confirmationCode').value;
         if (confirmationCode === randomCode) {
             deleteIndexedDB();
             document.getElementById('message').textContent = 'Database successfully deleted!';
             document.getElementById('confirmBox').classList.add('hidden');
+            hideContainer();
         } else {
             document.getElementById('message').textContent = 'Incorrect verification code, please try again.';
         }
@@ -199,7 +289,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Delete IndexedDB function
     function deleteIndexedDB() {
-        const dbName = 'myDatabase'; // Database name
+        const dbName = 'myDatabase';
         const request = indexedDB.deleteDatabase(dbName);
 
         request.onsuccess = function() {
@@ -214,4 +304,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.warn('Database deletion blocked');
         };
     }
+
+    // Generate verification code on page load
+    generateRandomCode();
 });
