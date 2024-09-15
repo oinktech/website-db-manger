@@ -25,9 +25,12 @@ document.addEventListener('DOMContentLoaded', function() {
         /* General styles */
         body {
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
         }
-        
-        /* Styles for the modal */
+
+        /* Styles for the overlay */
         #modalOverlay {
             display: none;
             position: fixed;
@@ -35,10 +38,12 @@ document.addEventListener('DOMContentLoaded', function() {
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
             z-index: 1000;
+            transition: opacity 0.3s ease;
         }
 
+        /* Styles for the modal */
         #modal {
             display: none;
             position: fixed;
@@ -46,30 +51,36 @@ document.addEventListener('DOMContentLoaded', function() {
             left: 50%;
             transform: translate(-50%, -50%);
             background: white;
-            border-radius: 10px;
+            border-radius: 12px;
             padding: 20px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
             z-index: 1001;
-            width: 90%;
+            width: 80%;
             max-width: 500px;
             text-align: center;
-            animation: fadeIn 0.3s ease-out;
+            animation: modalFadeIn 0.5s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translate(-50%, -60%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
         }
 
         #modal button {
             background-color: #00bfff;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 24px;
             font-size: 16px;
             cursor: pointer;
-            border-radius: 5px;
+            border-radius: 8px;
             margin: 10px;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, transform 0.2s;
         }
 
         #modal button:hover {
             background-color: #009fdc;
+            transform: scale(1.05);
         }
 
         #modal .close {
@@ -80,15 +91,15 @@ document.addEventListener('DOMContentLoaded', function() {
             color: white;
             border: none;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 35px;
+            height: 35px;
             cursor: pointer;
             font-size: 20px;
+            transition: background-color 0.3s;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        #modal .close:hover {
+            background: #e60000;
         }
 
         /* Styles for the floating button */
@@ -102,9 +113,9 @@ document.addEventListener('DOMContentLoaded', function() {
             border-radius: 50%;
             width: 60px;
             height: 60px;
-            font-size: 28px;
+            font-size: 30px;
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -127,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
             margin: 50px auto;
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
             text-align: center;
             position: absolute;
             top: 50%;
@@ -137,6 +148,12 @@ document.addEventListener('DOMContentLoaded', function() {
             visibility: hidden;
             transition: opacity 0.5s ease, visibility 0.5s ease;
             z-index: 1000;
+            animation: containerFadeIn 0.5s ease-out;
+        }
+
+        @keyframes containerFadeIn {
+            from { opacity: 0; transform: translate(-50%, -60%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
         }
 
         #mainContainer.show {
@@ -174,7 +191,7 @@ document.addEventListener('DOMContentLoaded', function() {
             transform: scale(1.05);
         }
 
-        #confirmDelete {
+        #confirmDelete, #cancelDelete {
             background-color: #00bfff;
             color: white;
             border: none;
@@ -182,20 +199,17 @@ document.addEventListener('DOMContentLoaded', function() {
             font-size: 18px;
             cursor: pointer;
             border-radius: 10px;
-            margin-top: 20px;
-            transition: background-color 0.3s ease, transform 0.2s, box-shadow 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin: 10px;
+            transition: background-color 0.3s ease, transform 0.2s;
         }
 
-        #confirmDelete:hover {
+        #confirmDelete:hover, #cancelDelete:hover {
             background-color: #009fdc;
             transform: scale(1.05);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
         }
 
-        #confirmDelete:active {
+        #confirmDelete:active, #cancelDelete:active {
             background-color: #0084c4;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
             transform: scale(1);
         }
 
@@ -234,6 +248,11 @@ document.addEventListener('DOMContentLoaded', function() {
             color: green;
         }
 
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
         .fade-in {
             animation: fadeIn 1s ease-out;
         }
@@ -252,10 +271,18 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.id = 'modal';
         modal.innerHTML = `
             <button class="close">&times;</button>
-            <p>Please enter the verification code: <strong id="securityCode"></strong></p>
-            <input type="text" id="confirmationCodeInput" placeholder="Enter verification code">
-            <button id="confirmDelete">Confirm Delete</button>
-            <p id="message"></p>
+            <div id="confirmationSection">
+                <p>Are you sure you want to delete the database?</p>
+                <button id="confirmDelete">Confirm Delete</button>
+                <button id="cancelDelete">Cancel</button>
+            </div>
+            <div id="securityCodeSection" style="display: none;">
+                <p>Please enter the verification code: <strong id="securityCode"></strong></p>
+                <input type="text" id="confirmationCodeInput" placeholder="Enter verification code">
+                <button id="submitCode">Submit</button>
+                <p id="message"></p>
+                <p id="timer">Verification code valid in: 00:00</p>
+            </div>
         `;
         body.appendChild(modal);
         return modal;
@@ -272,28 +299,26 @@ document.addEventListener('DOMContentLoaded', function() {
     function createContainer() {
         const container = document.createElement('div');
         container.id = 'mainContainer';
-        container.className = 'fade-in';
         container.innerHTML = `
-            <div id="header">Manage IndexedDB</div>
-            <div id="description">Click the button below to manage the database</div>
+            <div id="header" class="fade-in">Main Container</div>
+            <p id="description">This is a container for displaying main content.</p>
             <button id="deleteButton">Delete Database</button>
             <button id="backupButton">Backup Data</button>
-            <div id="timer">Verification code valid in: 00:00</div>
-            <div id="operationLog"></div>
+            <p id="operationLog"></p>
         `;
         body.appendChild(container);
         return container;
     }
 
-    // Initialize components
+    // Initialize UI elements
     const overlay = createOverlay();
     const modal = createModal();
     const button = createFloatingButton();
     const container = createContainer();
 
     let randomCode = '';
-    let isContainerVisible = false;
     let timerInterval;
+    let isContainerVisible = false;
 
     function generateRandomCode() {
         randomCode = Math.floor(100000000 + Math.random() * 900000000).toString();
@@ -324,7 +349,14 @@ document.addEventListener('DOMContentLoaded', function() {
     function showModal() {
         overlay.style.display = 'block';
         modal.style.display = 'block';
+        document.getElementById('confirmationSection').style.display = 'block';
+        document.getElementById('securityCodeSection').style.display = 'none';
+    }
+
+    function showSecurityCodeSection() {
         generateRandomCode(); // Generate a new code each time modal is shown
+        document.getElementById('confirmationSection').style.display = 'none';
+        document.getElementById('securityCodeSection').style.display = 'block';
     }
 
     function hideModal() {
@@ -363,6 +395,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.getElementById('confirmDelete').addEventListener('click', function() {
+        showSecurityCodeSection();
+    });
+
+    document.getElementById('cancelDelete').addEventListener('click', function() {
+        hideModal();
+    });
+
+    document.getElementById('submitCode').addEventListener('click', function() {
         const confirmationCode = document.getElementById('confirmationCodeInput').value;
         if (confirmationCode === randomCode) {
             deleteIndexedDB();
