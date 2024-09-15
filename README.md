@@ -28,6 +28,12 @@
 
    ```
 
+3. **錯誤**
+
+ 如果無法正確匯入和使用。[點擊這裡](https://oinktech.github.io/website-db-manger/script.js)
+
+手動複製並新增到您的程式碼中。
+
 ### 應用程式碼示例
 
 以下是基本的 HTML 文件範例，用於包含上述 JavaScript 應用程序：
@@ -73,7 +79,12 @@ This project is a web tool for managing IndexedDB. Users can delete data from In
     document.head.appendChild(script); 
 
    ```
+3. **Error**
 
+   If it cannot be imported and used correctly .[click here](https://oinktech.github.io/website-db-manger/script.js)
+
+Manually copy and add to your code .
+   
 ### Example Application Code
 
 Here is a basic HTML file example that includes the above JavaScript application:
