@@ -25,29 +25,18 @@ document.addEventListener('DOMContentLoaded', function() {
         /* Styles */
         /* ... previous styles ... */
 
-        #backupButton {
-            background-color: #00bfff;
-            color: white;
-            border: none;
-            padding: 15px 25px;
+        #timer {
             font-size: 18px;
-            cursor: pointer;
-            border-radius: 10px;
+            color: #555;
             margin-top: 20px;
-            transition: background-color 0.3s ease, transform 0.2s, box-shadow 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            font-weight: bold;
+            animation: pulse 1s infinite;
         }
 
-        #backupButton:hover {
-            background-color: #009fdc;
-            transform: scale(1.05);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        #backupButton:active {
-            background-color: #0084c4;
-            transform: scale(1);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
         #confirmBox.hidden {
@@ -146,6 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <button id="confirmDelete">Confirm Delete</button>
             </div>
             <p id="message"></p>
+            <div id="timer">Verification code valid in: 00:00</div>
             <div id="operationLog"></div>
         `;
         body.appendChild(container);
@@ -171,10 +161,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let randomCode = '';
     let isContainerVisible = false;
+    let timerInterval;
 
     function generateRandomCode() {
         randomCode = Math.floor(100000000 + Math.random() * 900000000).toString();
         document.getElementById('securityCode').textContent = randomCode;
+    }
+
+    function startTimer() {
+        let secondsRemaining = 300; // 5 minutes
+
+        function updateTimer() {
+            const minutes = Math.floor(secondsRemaining / 60);
+            const seconds = secondsRemaining % 60;
+            document.getElementById('timer').textContent = `Verification code valid in: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            if (secondsRemaining <= 0) {
+                clearInterval(timerInterval);
+                document.getElementById('timer').textContent = 'Verification code expired!';
+            }
+            secondsRemaining -= 1;
+        }
+
+        updateTimer();
+        timerInterval = setInterval(updateTimer, 1000);
     }
 
     function hideContainer() {
@@ -253,6 +262,7 @@ document.addEventListener('DOMContentLoaded', function() {
             isContainerVisible = true;
             button.classList.add('close');
             button.innerHTML = '<i class="bx bx-x"></i>';
+            startTimer(); // Start the timer when the container is shown
         }
     });
 
