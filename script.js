@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.5s ease, visibility 0.5s ease;
+            z-index: 1000;
         }
 
         .container.show {
@@ -157,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
+            z-index: 1001;
         }
 
         .confirm-dialog.show {
