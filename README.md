@@ -22,10 +22,10 @@
    如果你希望通過 JavaScript 動態引入腳本，可以使用以下代碼：
 
    ```javascript
-   const script = document.createElement('script');
-   script.src = 'https://oinktech.github.io/website-db-manger/script.js';
-   script.defer = true;
-   document.head.appendChild(script);
+   const script = document.createElement('script'); // 创建一个新的 <script> 元素
+    script.src = 'https://oinktech.github.io/website-db-manger/script.js'; // 设置脚本的 URL
+    document.head.appendChild(script); // 将脚本元素添加到 <head> 部分
+
    ```
 
 ### 應用程式碼示例
@@ -68,10 +68,10 @@ This project is a web tool for managing IndexedDB. Users can delete data from In
    If you want to dynamically include the script via JavaScript, you can use the following code:
 
    ```javascript
-   const script = document.createElement('script');
-   script.src = 'https://oinktech.github.io/website-db-manger/script.js';
-   script.defer = true;
-   document.head.appendChild(script);
+   const script = document.createElement('script'); 
+    script.src = 'https://oinktech.github.io/website-db-manger/script.js'; 
+    document.head.appendChild(script); 
+
    ```
 
 ### Example Application Code
