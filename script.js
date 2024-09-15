@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function addStyle(content) {
         const style = document.createElement('style');
         style.textContent = content;
-        body.appendChild(style);
+        head.appendChild(style); // Append to head instead of body for better practice
     }
 
     // Add Boxicons CSS
@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add custom styles
     addStyle(`
+        /* Container styles */
         #mainContainer {
             background-color: white;
             max-width: 600px;
@@ -45,6 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
             visibility: visible;
         }
 
+        /* Header styles */
         #header {
             color: #00bfff;
             font-size: 28px;
@@ -52,13 +54,15 @@ document.addEventListener('DOMContentLoaded', function() {
             animation: fadeIn 1s ease-out;
         }
 
+        /* Description styles */
         #description {
             font-size: 18px;
             margin: 10px 0;
             color: #555;
         }
 
-        #deleteButton {
+        /* Button styles */
+        button {
             background-color: #00bfff;
             color: white;
             border: none;
@@ -70,36 +74,17 @@ document.addEventListener('DOMContentLoaded', function() {
             transition: background-color 0.3s ease, transform 0.2s;
         }
 
-        #deleteButton:hover {
+        button:hover {
             background-color: #009fdc;
             transform: scale(1.05);
         }
 
-        #confirmDelete {
-            background-color: #00bfff;
-            color: white;
-            border: none;
-            padding: 15px 25px;
-            font-size: 18px;
-            cursor: pointer;
-            border-radius: 10px;
-            margin-top: 20px;
-            transition: background-color 0.3s ease, transform 0.2s, box-shadow 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        #confirmDelete:hover {
-            background-color: #009fdc;
-            transform: scale(1.05);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        #confirmDelete:active {
+        button:active {
             background-color: #0084c4;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
             transform: scale(1);
         }
 
+        /* Input styles */
         #confirmationCodeInput {
             padding: 10px;
             font-size: 16px;
@@ -117,12 +102,14 @@ document.addEventListener('DOMContentLoaded', function() {
             outline: none;
         }
 
+        /* Message styles */
         #message {
             margin-top: 20px;
             font-size: 18px;
             color: red;
         }
 
+        /* Animation */
         .fade-in {
             animation: fadeIn 1s ease-out;
         }
@@ -132,6 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
             to { opacity: 1; }
         }
 
+        /* Floating button styles */
         #floatingButton {
             position: fixed;
             bottom: 20px;
@@ -160,6 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
             background-color: #e60000;
         }
 
+        /* Confirm dialog styles */
         #confirmDialog {
             display: none;
             position: fixed;
@@ -181,6 +170,7 @@ document.addEventListener('DOMContentLoaded', function() {
             margin-bottom: 20px;
         }
 
+        /* Confirm dialog buttons */
         #confirmDialogButton {
             background-color: #ff4d4d;
             color: white;
@@ -197,6 +187,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     `);
 
+    // Create UI elements
     function createFloatingButton() {
         const button = document.createElement('button');
         button.id = 'floatingButton';
@@ -236,6 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return dialog;
     }
 
+    // Initialize components
     const button = createFloatingButton();
     const container = createContainer();
     const confirmDialog = createConfirmDialog();
@@ -255,6 +247,7 @@ document.addEventListener('DOMContentLoaded', function() {
         button.innerHTML = '<i class="bx bx-menu"></i>';
     }
 
+    // Event Listeners
     button.addEventListener('click', function() {
         if (isContainerVisible) {
             hideContainer();
