@@ -256,6 +256,23 @@ document.addEventListener('DOMContentLoaded', function() {
         .fade-in {
             animation: fadeIn 1s ease-out;
         }
+
+        /* Styles for the database list */
+        #databaseList {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+        }
+
+        #databaseList li {
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        #databaseList input[type="checkbox"] {
+            margin-right: 10px;
+        }
     `);
 
     // Create UI elements
@@ -271,8 +288,15 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.id = 'modal';
         modal.innerHTML = `
             <button class="close">&times;</button>
-            <div id="confirmationSection">
-                <p>Are you sure you want to delete the database?</p>
+            <div id="databaseSection">
+                <h2>Choose databases to delete</h2>
+                <ul id="databaseList"></ul>
+                <button id="deleteSelected">Delete Selected</button>
+                <button id="deleteAll">Delete All</button>
+                <button id="cancel">Cancel</button>
+            </div>
+            <div id="confirmationSection" style="display: none;">
+                <p>Are you sure you want to delete the selected databases?</p>
                 <button id="confirmDelete">Confirm Delete</button>
                 <button id="cancelDelete">Cancel</button>
             </div>
@@ -300,63 +324,25 @@ document.addEventListener('DOMContentLoaded', function() {
         const container = document.createElement('div');
         container.id = 'mainContainer';
         container.innerHTML = `
-            <div id="header" class="fade-in">Main Container</div>
-            <p id="description">This is a container for displaying main content.</p>
-            <button id="deleteButton">Delete Database</button>
-            <button id="backupButton">Backup Data</button>
-            <p id="operationLog"></p>
+            <h1 id="header">Manage IndexedDB</h1>
+            <p id="description">Click the button to manage IndexedDB databases.</p>
+            <button id="deleteButton">Delete IndexedDB</button>
+            <button id="backupButton">Backup IndexedDB</button>
         `;
         body.appendChild(container);
         return container;
     }
 
-    // Initialize UI elements
+    // Create and show UI elements
     const overlay = createOverlay();
     const modal = createModal();
-    const button = createFloatingButton();
+    const floatingButton = createFloatingButton();
     const container = createContainer();
-
-    let randomCode = '';
-    let timerInterval;
-    let isContainerVisible = false;
-
-    function generateRandomCode() {
-        randomCode = Math.floor(100000000 + Math.random() * 900000000).toString();
-        document.getElementById('securityCode').textContent = randomCode;
-        startTimer(); // Start timer each time a new code is generated
-    }
-
-    function startTimer() {
-        let secondsRemaining = 300; // 5 minutes
-
-        function updateTimer() {
-            const minutes = Math.floor(secondsRemaining / 60);
-            const seconds = secondsRemaining % 60;
-            document.getElementById('timer').textContent = `Verification code valid in: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-            if (secondsRemaining <= 0) {
-                clearInterval(timerInterval);
-                document.getElementById('message').textContent = 'Verification code expired. Please generate a new one.';
-                hideModal();
-            }
-            secondsRemaining--;
-        }
-
-        clearInterval(timerInterval);
-        updateTimer(); // Initial call
-        timerInterval = setInterval(updateTimer, 1000);
-    }
 
     function showModal() {
         overlay.style.display = 'block';
         modal.style.display = 'block';
-        document.getElementById('confirmationSection').style.display = 'block';
-        document.getElementById('securityCodeSection').style.display = 'none';
-    }
-
-    function showSecurityCodeSection() {
-        generateRandomCode(); // Generate a new code each time modal is shown
-        document.getElementById('confirmationSection').style.display = 'none';
-        document.getElementById('securityCodeSection').style.display = 'block';
+        populateDatabaseList();
     }
 
     function hideModal() {
@@ -364,66 +350,96 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.style.display = 'none';
     }
 
-    function hideContainer() {
-        container.classList.remove('show');
-        isContainerVisible = false;
-        button.classList.remove('close');
-        button.innerHTML = '<i class="bx bx-menu"></i>';
+    function populateDatabaseList() {
+        const list = document.getElementById('databaseList');
+        list.innerHTML = '';
+        indexedDB.databases().then(databases => {
+            databases.forEach(db => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <input type="checkbox" id="db-${db.name}" value="${db.name}">
+                    <label for="db-${db.name}">${db.name}</label>
+                `;
+                list.appendChild(listItem);
+            });
+        });
     }
 
-    button.addEventListener('click', function() {
-        if (isContainerVisible) {
-            hideContainer();
-        } else {
-            container.classList.add('show');
-            isContainerVisible = true;
-            button.classList.add('close');
-            button.innerHTML = '<i class="bx bx-x"></i>';
+    document.getElementById('floatingButton').addEventListener('click', showModal);
+
+    document.querySelector('#modal .close').addEventListener('click', hideModal);
+
+    document.getElementById('deleteSelected').addEventListener('click', () => {
+        document.getElementById('confirmationSection').style.display = 'block';
+    });
+
+    document.getElementById('deleteAll').addEventListener('click', async () => {
+        const databases = await indexedDB.databases();
+        for (const db of databases) {
+            indexedDB.deleteDatabase(db.name);
         }
-    });
-
-    document.getElementById('deleteButton').addEventListener('click', function() {
-        showModal();
-    });
-
-    document.getElementById('backupButton').addEventListener('click', function() {
-        backupData();
-    });
-
-    document.querySelector('#modal .close').addEventListener('click', function() {
+        alert('All databases have been deleted.');
         hideModal();
     });
 
-    document.getElementById('confirmDelete').addEventListener('click', function() {
-        showSecurityCodeSection();
-    });
+    document.getElementById('cancel').addEventListener('click', hideModal);
 
-    document.getElementById('cancelDelete').addEventListener('click', function() {
+    document.getElementById('confirmDelete').addEventListener('click', async () => {
+        const checkboxes = document.querySelectorAll('#databaseList input[type="checkbox"]:checked');
+        const databasesToDelete = Array.from(checkboxes).map(checkbox => checkbox.value);
+        
+        for (const dbName of databasesToDelete) {
+            indexedDB.deleteDatabase(dbName);
+        }
+        
+        alert('Selected databases have been deleted.');
         hideModal();
     });
 
-    document.getElementById('submitCode').addEventListener('click', function() {
-        const confirmationCode = document.getElementById('confirmationCodeInput').value;
-        if (confirmationCode === randomCode) {
-            deleteIndexedDB();
-            document.getElementById('message').textContent = 'Database successfully deleted!';
-            hideModal();
-            hideContainer();
+    document.getElementById('cancelDelete').addEventListener('click', () => {
+        document.getElementById('confirmationSection').style.display = 'none';
+    });
+
+    document.getElementById('submitCode').addEventListener('click', () => {
+        const codeInput = document.getElementById('confirmationCodeInput').value;
+        const code = document.getElementById('securityCode').textContent;
+        if (codeInput === code) {
+            alert('Code is correct.');
+            // Perform the action after correct code
+            document.getElementById('securityCodeSection').style.display = 'none';
+            document.getElementById('message').textContent = '';
         } else {
-            document.getElementById('message').textContent = 'Incorrect verification code. Please try again.';
+            document.getElementById('message').textContent = 'Incorrect code. Please try again.';
         }
     });
 
-    // Dummy functions for demonstration
-    function deleteIndexedDB() {
-        console.log('Deleting IndexedDB...');
-        // Your logic for deleting IndexedDB
-        document.getElementById('operationLog').textContent = 'IndexedDB has been deleted.';
+    // Timer functionality for code validation
+    function startTimer() {
+        const timerElement = document.getElementById('timer');
+        let time = 300; // 5 minutes
+        function updateTimer() {
+            const minutes = Math.floor(time / 60);
+            const seconds = time % 60;
+            timerElement.textContent = `Verification code valid in: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            if (time <= 0) {
+                clearInterval(interval);
+                timerElement.textContent = 'Verification code expired.';
+            }
+            time--;
+        }
+        updateTimer();
+        const interval = setInterval(updateTimer, 1000);
     }
 
-    function backupData() {
-        console.log('Backing up data...');
-        // Your logic for backing up data
-        document.getElementById('operationLog').textContent = 'Data backup completed.';
+    // Show the verification code section
+    function showVerificationCode() {
+        document.getElementById('securityCode').textContent = generateCode();
+        document.getElementById('securityCodeSection').style.display = 'block';
+        startTimer();
+    }
+
+    // Generate a random verification code
+    function generateCode() {
+        return Math.random().toString(36).substr(2, 6).toUpperCase();
     }
 });
