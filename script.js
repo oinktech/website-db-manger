@@ -22,14 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add custom styles
     addStyle(`
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f0f0;
-            color: #333;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
+        
 
         .container {
             background-color: white;
