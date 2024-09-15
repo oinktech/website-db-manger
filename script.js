@@ -22,8 +22,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add custom styles
     addStyle(`
-        
-
         #mainContainer {
             background-color: white;
             max-width: 600px;
@@ -60,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
             color: #555;
         }
 
-        #deleteButton ,confirmDelete{
+        #deleteButton {
             background-color: #00bfff;
             color: white;
             border: none;
@@ -77,11 +75,30 @@ document.addEventListener('DOMContentLoaded', function() {
             transform: scale(1.05);
         }
 
-#confirmDelete:hover {
-            background-color: #009fdc;
-            transform: scale(1.05);
+        #confirmDelete {
+            background-color: #00bfff;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 10px;
+            margin-top: 20px;
+            transition: background-color 0.3s ease, transform 0.2s, box-shadow 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
+        #confirmDelete:hover {
+            background-color: #009fdc;
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        #confirmDelete:active {
+            background-color: #0084c4;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+            transform: scale(1);
+        }
 
         #confirmationCodeInput {
             padding: 10px;
