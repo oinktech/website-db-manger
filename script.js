@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
             color: #555;
         }
 
-        #deleteButton {
+        #deleteButton ,confirmDelete{
             background-color: #00bfff;
             color: white;
             border: none;
@@ -76,6 +76,12 @@ document.addEventListener('DOMContentLoaded', function() {
             background-color: #009fdc;
             transform: scale(1.05);
         }
+
+#confirmDelete:hover {
+            background-color: #009fdc;
+            transform: scale(1.05);
+        }
+
 
         #confirmationCodeInput {
             padding: 10px;
